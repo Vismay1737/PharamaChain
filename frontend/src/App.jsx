@@ -13,6 +13,8 @@ import Batches from './pages/Batches';
 import BatchDetail from './pages/BatchDetail';
 import Alerts from './pages/Alerts';
 import AuditLog from './pages/AuditLog';
+import AiChat from './pages/AiChat';
+import VerifyDrug from './pages/VerifyDrug';
 
 const queryClient = new QueryClient();
 
@@ -20,7 +22,7 @@ const ProtectedLayout = () => {
     const { user, loading } = useAuth();
     
     if (loading) return (
-        <div className="h-screen bg-navy-900 flex items-center justify-center">
+        <div className="h-screen bg-[#0a0e1a] flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
                 <div className="w-16 h-16 border-4 border-teal-500/20 border-t-teal-500 rounded-full animate-spin"></div>
                 <p className="text-teal-500 font-black tracking-widest text-[10px] uppercase animate-pulse">Initializing Nodes...</p>
@@ -43,7 +45,7 @@ const ProtectedLayout = () => {
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-        <Toaster position="top-right" />
+        <Toaster position="top-right" toastOptions={{ style: { background: '#111827', color: '#f1f5f9', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' } }} />
         <AuthProvider>
             <SocketProvider>
                 <Router>
@@ -55,6 +57,8 @@ const App = () => {
                             <Route path="/batches/:id" element={<BatchDetail />} />
                             <Route path="/alerts" element={<Alerts />} />
                             <Route path="/audit" element={<AuditLog />} />
+                            <Route path="/chat" element={<AiChat />} />
+                            <Route path="/verify" element={<VerifyDrug />} />
                         </Route>
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
