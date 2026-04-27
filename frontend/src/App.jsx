@@ -22,10 +22,10 @@ const ProtectedLayout = () => {
     const { user, loading } = useAuth();
     
     if (loading) return (
-        <div className="h-screen bg-[#0a0e1a] flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 border-4 border-teal-500/20 border-t-teal-500 rounded-full animate-spin"></div>
-                <p className="text-teal-500 font-black tracking-widest text-[10px] uppercase animate-pulse">Initializing Nodes...</p>
+        <div className="h-screen bg-gray-50 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-12 h-12 border-3 border-green-200 border-t-green-500 rounded-full animate-spin"></div>
+                <p className="text-green-600 font-semibold text-xs uppercase tracking-wider">Loading...</p>
             </div>
         </div>
     );

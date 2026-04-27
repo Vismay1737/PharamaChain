@@ -3,11 +3,22 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../contexts/AuthContext';
 import Header from '../components/Layout/Header';
 import StatCard from '../components/Dashboard/StatCard';
-import { Package, AlertTriangle, Fingerprint, Activity, BrainCircuit, TrendingUp, ArrowRight, AlertOctagon, CheckCircle2, Box, ShieldCheck } from 'lucide-react';
+import { Package, AlertTriangle, Fingerprint, Activity, ArrowRight, AlertOctagon, CheckCircle2, Box, ShieldCheck, BrainCircuit, TrendingUp, Truck, Factory, FlaskConical } from 'lucide-react';
 import { CardSkeleton } from '../components/shared/LoadingSpinner';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, Legend } from 'recharts';
+
+/* ── Fake 7-day activity data ────────────────────────────────── */
+const activityData = [
+  { day: 'Mon', shipments: 12, verified: 10, flagged: 2 },
+  { day: 'Tue', shipments: 18, verified: 16, flagged: 1 },
+  { day: 'Wed', shipments: 15, verified: 14, flagged: 3 },
+  { day: 'Thu', shipments: 22, verified: 20, flagged: 2 },
+  { day: 'Fri', shipments: 28, verified: 25, flagged: 1 },
+  { day: 'Sat', shipments: 20, verified: 18, flagged: 0 },
+  { day: 'Today', shipments: 25, verified: 23, flagged: 2 },
+];
 
 const Dashboard = () => {
   const { data: stats, isLoading } = useQuery({
@@ -26,109 +37,140 @@ const Dashboard = () => {
 
   const alerts = alertsData?.items || [];
   const batches = batchesData?.items || [];
+  const trustScore = stats?.total_batches > 0 ? Math.round(100 - ((stats?.flagged||0) / stats.total_batches * 100)) : 100;
 
-  const pieData = [
-    { name: 'Active', value: stats?.active || 0, color: '#14b8a6' },
-    { name: 'Flagged', value: stats?.flagged || 0, color: '#f43f5e' },
-    { name: 'Recalled', value: stats?.recalled || 0, color: '#f59e0b' },
-  ].filter(d => d.value > 0);
-
-  const barData = batches.slice(0, 5).map(b => ({
-    name: b.drug_name?.split(' ')[0] || b.batch_id,
-    qty: b.quantity || 5000,
-    status: b.status
-  }));
+  const radialData = [
+    { name: 'Trust', value: trustScore, fill: trustScore > 80 ? '#22c55e' : trustScore > 50 ? '#f59e0b' : '#ef4444' }
+  ];
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[var(--background)]">
-      <Header title="Mission Control" />
-      <main className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Header title="Dashboard" />
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {isLoading ? (<><CardSkeleton /><CardSkeleton /><CardSkeleton /><CardSkeleton /></>) : (<>
-            <StatCard title="Active Shipments" value={stats?.active || 0} icon={Package} color="teal" trend={5.2} />
+            <StatCard title="Active Shipments" value={stats?.active || 0} icon={Package} color="green" trend={5.2} />
             <StatCard title="AI Flagged" value={stats?.flagged || 0} icon={AlertTriangle} color="red" trend={stats?.flagged > 0 ? 2.1 : -1.4} />
-            <StatCard title="Trust Score" value={stats?.total_batches > 0 ? (100 - ((stats?.flagged||0) / stats.total_batches * 100)).toFixed(1) : "100.0"} unit="%" icon={Fingerprint} color="teal" />
+            <StatCard title="Verified" value={stats?.verified || 0} icon={ShieldCheck} color="blue" />
             <StatCard title="Total Batches" value={stats?.total_batches || 0} icon={Activity} color="indigo" />
           </>)}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
-              <TrendingUp size={16} className="text-teal-400" /> Batch Status
-            </h3>
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value" stroke="none">
-                  {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
-                </Pie><Tooltip contentStyle={{ backgroundColor: '#111827', borderColor: '#1e293b', borderRadius: '12px', fontSize: '12px' }} /></PieChart>
-              </ResponsiveContainer>
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
+          {/* Area Chart - Supply Chain Activity (takes 3 cols) */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="card p-5 xl:col-span-3">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                <TrendingUp size={14} className="text-green-500" /> Supply Chain Activity — Last 7 Days
+              </h3>
+              <div className="flex gap-4 text-[11px]">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-500" /> Shipments</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Verified</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400" /> Flagged</span>
+              </div>
             </div>
-            <div className="flex justify-center gap-6 mt-2">
-              {pieData.map(d => (<div key={d.name} className="flex items-center gap-2 text-xs"><div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} /><span className="text-slate-400 font-medium">{d.name} ({d.value})</span></div>))}
+            <div className="h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={activityData}>
+                  <defs>
+                    <linearGradient id="gradShip" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gradVerif" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 500 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+                  <Area type="monotone" dataKey="shipments" stroke="#22c55e" strokeWidth={2.5} fillOpacity={1} fill="url(#gradShip)" dot={{ fill: '#22c55e', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2 }} />
+                  <Area type="monotone" dataKey="verified" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#gradVerif)" dot={false} />
+                  <Area type="monotone" dataKey="flagged" stroke="#ef4444" strokeWidth={2} fillOpacity={0} dot={{ fill: '#ef4444', r: 3, strokeWidth: 0 }} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6 xl:col-span-2">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6 flex items-center gap-2">
-              <Package size={16} className="text-indigo-400" /> Inventory Volume
-            </h3>
-            <div className="h-[260px]">
+          {/* Trust Score Gauge (takes 1 col) */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="card p-5 flex flex-col items-center justify-center">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Trust Score</h3>
+            <div className="h-[170px] w-full relative">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData} barCategoryGap="25%">
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10 }} />
-                  <Tooltip contentStyle={{ backgroundColor: '#111827', borderColor: '#1e293b', borderRadius: '12px', fontSize: '12px' }} formatter={(v) => [`${v.toLocaleString()} units`, 'Qty']} />
-                  <Bar dataKey="qty" radius={[8, 8, 0, 0]}>{barData.map((e, i) => <Cell key={i} fill={e.status === 'FLAGGED' ? '#f43f5e' : '#14b8a6'} fillOpacity={0.8} />)}</Bar>
-                </BarChart>
+                <RadialBarChart cx="50%" cy="50%" innerRadius="65%" outerRadius="90%" startAngle={210} endAngle={-30} data={radialData} barSize={12}>
+                  <RadialBar background={{ fill: '#f1f5f9' }} clockWise dataKey="value" cornerRadius={10} />
+                </RadialBarChart>
               </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className={`text-3xl font-black ${trustScore > 80 ? 'text-green-600' : trustScore > 50 ? 'text-amber-500' : 'text-red-500'}`}>{trustScore}%</span>
+                <span className="text-[10px] text-gray-400 font-medium uppercase mt-0.5">{trustScore > 80 ? 'Excellent' : trustScore > 50 ? 'Moderate' : 'Critical'}</span>
+              </div>
+            </div>
+            {/* Supply chain mini-stats */}
+            <div className="w-full space-y-2 mt-2">
+              {[
+                { icon: Factory, label: 'Manufactured', val: stats?.total_batches || 0, color: 'text-gray-600' },
+                { icon: FlaskConical, label: 'QC Passed', val: stats?.verified || 0, color: 'text-blue-500' },
+                { icon: Truck, label: 'In Transit', val: stats?.active || 0, color: 'text-green-500' },
+              ].map(({ icon: Icon, label, val, color }) => (
+                <div key={label} className="flex items-center justify-between text-[11px]">
+                  <span className="flex items-center gap-1.5 text-gray-400"><Icon size={12} className={color} /> {label}</span>
+                  <span className="font-bold text-gray-700">{val}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card overflow-hidden">
-            <div className="p-5 border-b border-white/5 flex justify-between items-center">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2"><BrainCircuit size={16} className="text-rose-400" /> AI Threat Detection</h3>
-              <Link to="/alerts" className="text-[10px] font-bold text-teal-400 hover:text-teal-300 uppercase tracking-wider flex items-center gap-1">View All <ArrowRight size={12} /></Link>
+        {/* Bottom Row */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          {/* AI Threats */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2"><BrainCircuit size={14} className="text-red-400" /> AI Threat Detection</h3>
+              <Link to="/alerts" className="text-[11px] font-semibold text-green-600 hover:text-green-700 flex items-center gap-1">View All <ArrowRight size={12} /></Link>
             </div>
-            <div className="p-4 space-y-3 max-h-[320px] overflow-y-auto custom-scrollbar">
+            <div className="p-4 space-y-2.5 max-h-[280px] overflow-y-auto">
               {alerts.length === 0 ? (
-                <div className="p-8 text-center"><ShieldCheck size={32} className="text-teal-400 mx-auto mb-3" /><p className="text-sm text-slate-400">All systems nominal</p></div>
-              ) : alerts.slice(0, 5).map(alert => (
-                <div key={alert.id} className={`p-4 rounded-xl border ${alert.is_acknowledged ? 'bg-white/[0.02] border-white/5 opacity-60' : 'bg-rose-500/5 border-rose-500/20'}`}>
+                <div className="p-6 text-center"><ShieldCheck size={28} className="text-green-500 mx-auto mb-2" /><p className="text-sm text-gray-400">All systems nominal</p></div>
+              ) : alerts.slice(0, 4).map(alert => (
+                <div key={alert.id} className={`p-3.5 rounded-lg border ${alert.is_acknowledged ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-red-50/50 border-red-100'}`}>
                   <div className="flex items-start gap-3">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${alert.is_acknowledged ? 'bg-slate-500/10 text-slate-500' : 'bg-rose-500/10 text-rose-400'}`}><AlertOctagon size={18} /></div>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${alert.is_acknowledged ? 'bg-gray-100 text-gray-400' : 'bg-red-100 text-red-500'}`}><AlertOctagon size={16} /></div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-black text-white uppercase">{alert.anomaly_type}</span>
-                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${alert.severity === 'CRITICAL' ? 'bg-rose-500 text-white' : 'bg-orange-500/20 text-orange-400'}`}>{alert.severity}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-900">{alert.anomaly_type}</span>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${alert.severity === 'CRITICAL' ? 'bg-red-500 text-white' : 'bg-orange-100 text-orange-600'}`}>{alert.severity}</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 font-mono truncate">{alert.batch_id}</p>
+                      <p className="text-[11px] text-gray-400 font-mono mt-0.5">{alert.batch_id}</p>
                     </div>
-                    {alert.is_acknowledged && <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-1" />}
+                    {alert.is_acknowledged && <CheckCircle2 size={14} className="text-green-500 shrink-0" />}
                   </div>
                 </div>
               ))}
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card overflow-hidden">
-            <div className="p-5 border-b border-white/5 flex justify-between items-center">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2"><Box size={16} className="text-indigo-400" /> Recent Batches</h3>
-              <Link to="/batches" className="text-[10px] font-bold text-teal-400 hover:text-teal-300 uppercase tracking-wider flex items-center gap-1">View All <ArrowRight size={12} /></Link>
+          {/* Recent Batches */}
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="card overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider flex items-center gap-2"><Box size={14} className="text-indigo-500" /> Recent Batches</h3>
+              <Link to="/batches" className="text-[11px] font-semibold text-green-600 hover:text-green-700 flex items-center gap-1">View All <ArrowRight size={12} /></Link>
             </div>
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-gray-50">
               {batches.slice(0, 5).map(batch => (
-                <Link key={batch.id} to={`/batches/${batch.batch_id}`} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-all group">
+                <Link key={batch.id} to={`/batches/${batch.batch_id}`} className="px-5 py-3.5 flex items-center justify-between hover:bg-gray-50 transition-all group">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center"><Package size={18} /></div>
-                    <div><p className="text-sm font-bold text-white group-hover:text-teal-400 transition-colors">{batch.drug_name}</p><p className="text-[10px] text-slate-500 font-mono">{batch.batch_id}</p></div>
+                    <div className="w-9 h-9 bg-indigo-50 text-indigo-500 rounded-lg flex items-center justify-center"><Package size={16} /></div>
+                    <div><p className="text-sm font-semibold text-gray-900 group-hover:text-green-600 transition-colors">{batch.drug_name}</p><p className="text-[10px] text-gray-400 font-mono">{batch.batch_id} · {batch.current_location || 'In Transit'}</p></div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${batch.status === 'ACTIVE' ? 'bg-teal-500/10 text-teal-400' : batch.status === 'FLAGGED' ? 'bg-rose-500/10 text-rose-400' : 'bg-amber-500/10 text-amber-400'}`}>{batch.status}</span>
-                    <ArrowRight size={16} className="text-slate-600 group-hover:text-teal-400 transition-colors" />
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${batch.status === 'ACTIVE' ? 'bg-green-50 text-green-600' : batch.status === 'FLAGGED' ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-600'}`}>{batch.status}</span>
+                    <ArrowRight size={14} className="text-gray-300 group-hover:text-green-500 transition-colors" />
                   </div>
                 </Link>
               ))}
