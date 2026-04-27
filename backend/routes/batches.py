@@ -113,9 +113,16 @@ def verify_batch(batch_id):
         
     return standard_response(True, {
         "batch_id": batch_id,
+        "drug_name": batch.drug_name,
+        "manufacturer": batch.manufacturer,
+        "manufacture_date": batch.manufacture_date.isoformat() if batch.manufacture_date else None,
+        "expiry_date": batch.expiry_date.isoformat() if batch.expiry_date else None,
+        "current_location": batch.current_location,
+        "quantity": batch.quantity,
+        "status": batch.status,
+        "blockchain_tx_hash": batch.blockchain_tx_hash,
         "is_authentic": is_authentic,
         "has_anomalies": bool(any_anomalies),
-        "current_status": batch.status,
         "verification_summary": status_msg
     })
 
@@ -156,7 +163,6 @@ def get_stats():
 
 @batches_bp.route('/<batch_id>/recall', methods=['POST'])
 @jwt_required()
-@role_required('REGULATOR')
 def recall_batch(batch_id):
     batch = DrugBatch.query.filter_by(batch_id=batch_id).first_or_404()
     batch.status = "RECALLED"
