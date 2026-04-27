@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: pharmachain-broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c 'cat < /dev/tcp/localhost/1883'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pharmachain-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    environment:
+      - FLASK_DEBUG=1
+      - MQTT_BROKER_HOST=mosquitto
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pharmachain-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      # Must match the variable name used in AuthContext.jsx and SocketContext.jsx
+      - VITE_API_BASE_URL=http://localhost:5000/api
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: on-failure
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
