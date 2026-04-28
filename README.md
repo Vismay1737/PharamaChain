@@ -5,7 +5,8 @@
 ### AI-Powered Decentralized Pharmaceutical Supply Chain
 
 [![Google Solution Challenge 2026](https://img.shields.io/badge/Google%20Solution%20Challenge-2026-4285F4?style=for-the-badge&logo=google)](https://hack2skill.com/event/solution-challenge-2026)
-[![Gemini 1.5 Flash](https://img.shields.io/badge/Gemini%201.5%20Flash-Powered-FF6F00?style=for-the-badge&logo=google)](https://ai.google.dev)
+[![Gemini AI](https://img.shields.io/badge/Gemini%20Flash%20Lite-Powered-FF6F00?style=for-the-badge&logo=google)](https://ai.google.dev)
+[![Google Cloud](https://img.shields.io/badge/Google%20Cloud-Run-4285F4?style=for-the-badge&logo=google-cloud)](https://cloud.google.com/run)
 [![Ethereum](https://img.shields.io/badge/Ethereum-Blockchain-3C3C3D?style=for-the-badge&logo=ethereum)](https://ethereum.org)
 
 [![SDG 3](https://img.shields.io/badge/SDG%203-Good%20Health%20%26%20Well--Being-4C9F38?style=flat-square)](https://sdgs.un.org/goals/goal3)
@@ -39,8 +40,9 @@ PharmaChain is a **full-stack enterprise platform** that combines **Google Gemin
 | 🧠 **AI Anomaly Detection** | Gemini 1.5 analyzes batch history and audit logs to assign integrity scores and detect supply chain risks. |
 | ⛓️ **Blockchain Provenance** | Every batch registration and status change is immutably recorded via smart contracts (simulated for demo). |
 | 💬 **AI Chat Interface** | Conversational Gemini AI — ask questions about any drug batch, flag statuses, and get contextual compliance answers. |
-| 🔍 **Verify Drug Integrity** | Cross-check physical drug batches against the immutable blockchain ledger in real-time. |
-| 📊 **High-Fidelity Dashboard** | Professional logistics dashboard with gradient area charts, radial trust score gauges, and dual Light/Dark themes. |
+| 🔍 **Public Provenance Verification** | End-users (patients/pharmacies) can enter a Batch ID to see the full historical timeline and verify authenticity. |
+| 🚨 **Counterfeit Reporting** | Public clients can report suspected counterfeits or adverse reactions, instantly generating a high-priority alert on the manufacturer's dashboard. |
+| 📊 **High-Fidelity Dashboard** | Professional logistics dashboard featuring a real-world SDG Impact Panel, gradient area charts, and dual Light/Dark themes. |
 | 🔐 **Role-Based Access** | JWT authentication tailored for Manufacturers, Distributors, and Regulators. |
 
 ---
@@ -49,7 +51,7 @@ PharmaChain is a **full-stack enterprise platform** that combines **Google Gemin
 
 | Layer | Technologies |
 |-------|-------------|
-| **AI** | Google Gemini 1.5 Flash (anomaly detection, reports, chat) |
+| **AI** | Google Gemini Flash Lite (anomaly detection, reports, chat) |
 | **Backend** | Python, Flask, JWT, SQLAlchemy |
 | **Frontend** | React 19, Vite, TailwindCSS, Framer Motion, Recharts |
 | **Blockchain** | Simulated Ethereum ledger (extensible to Web3) |
@@ -120,7 +122,8 @@ cd frontend && npm run dev
 
 ## 🏗️ Google Technologies Used
 
-1. **Google Gemini 1.5 Flash** — Real-time AI anomaly detection, safety report generation, and conversational supply chain assistant (`/api/chat` and `/api/alerts`).
+1. **Google Gemini Flash Lite** — Real-time AI anomaly detection, safety report generation, and conversational supply chain assistant (`/api/chat` and `/api/alerts`).
+2. **Google Cloud Run & Cloud Build** — Native `cloudbuild.yaml` and production `Dockerfile` provided for instant, serverless deployment to Google Cloud Platform.
 
 ---
 

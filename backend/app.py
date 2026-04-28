@@ -21,7 +21,7 @@ jwt = JWTManager()
 bcrypt = Bcrypt()
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static', static_url_path='/')
     app.config.from_object(Config)
 
     # Initialize extensions
@@ -32,9 +32,21 @@ def create_app():
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # --- Error Handlers ---
+    @app.route('/')
+    def index():
+        try:
+            return app.send_static_file('index.html')
+        except:
+            return jsonify({"error": "Frontend not built. Run npm run build."}), 404
+
     @app.errorhandler(404)
     def not_found(error):
-        return jsonify({"error": "Resource not found", "path": request.path}), 404
+        if request.path.startswith('/api/'):
+            return jsonify({"error": "Resource not found", "path": request.path}), 404
+        try:
+            return app.send_static_file('index.html')
+        except:
+            return jsonify({"error": "Resource not found", "path": request.path}), 404
 
     @app.errorhandler(405)
     def method_not_allowed(error):

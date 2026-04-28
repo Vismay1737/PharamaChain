@@ -55,7 +55,7 @@ const Sidebar = () => {
             <p className="text-[10px] uppercase font-medium" style={{ color: 'var(--text-muted)' }}>{user?.role || 'User'}</p>
           </div>
         </div>
-        <button onClick={logout} className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+        <button onClick={logout} className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg transition-colors hover:dark:bg-red-500/10 bg-red-50 hover:dark:text-red-400 text-red-500 dark:hover:bg-red-500/10"
           style={{ color: 'var(--text-muted)' }}>
           <LogOut size={16} /> Logout
         </button>

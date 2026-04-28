@@ -32,7 +32,7 @@ const AIAlerter = ({ alerts }) => {
             key={`${alert.batch_id}-${alert.timestamp}-${idx}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className={`glass-card p-4 border-l-4 ${alert.severity === 'CRITICAL' ? 'border-l-red-500' : 'border-l-amber-500'} cursor-pointer hover:bg-white/5 transition-all`}
+            className={`glass-card p-4 border-l-4 ${alert.severity === 'CRITICAL' ? 'border-l-red-500' : 'border-l-amber-500'} cursor-pointer hover:t-card/5 transition-all`}
             onClick={() => setSelectedAlert(alert)}
           >
             <div className="flex justify-between items-start mb-2">
@@ -74,7 +74,7 @@ const AIAlerter = ({ alerts }) => {
                 <h2 className="text-xl font-bold italic">Gemini <span className="text-sky-400">Analysis Report</span></h2>
                 <button 
                   onClick={() => setSelectedAlert(null)}
-                  className="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center"
+                  className="w-8 h-8 rounded-full hover:t-card/5 flex items-center justify-center"
                 >
                   ✕
                 </button>
@@ -82,11 +82,11 @@ const AIAlerter = ({ alerts }) => {
               
               <div className="p-8 overflow-y-auto space-y-6 text-sm leading-relaxed">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-white/5 rounded-xl">
+                  <div className="p-4 t-card/5 rounded-xl">
                     <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Severity</p>
                     <p className={`font-bold ${selectedAlert.severity === 'CRITICAL' ? 'text-red-400' : 'text-amber-400'}`}>{selectedAlert.severity}</p>
                   </div>
-                  <div className="p-4 bg-white/5 rounded-xl">
+                  <div className="p-4 t-card/5 rounded-xl">
                     <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Confidence</p>
                     <p className="font-bold text-sky-400">{(selectedAlert.confidence * 100).toFixed(0)}%</p>
                   </div>

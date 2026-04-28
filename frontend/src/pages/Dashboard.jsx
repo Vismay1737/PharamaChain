@@ -1,14 +1,15 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Header from '../components/Layout/Header';
 import StatCard from '../components/Dashboard/StatCard';
-import { Package, AlertTriangle, Activity, ArrowRight, AlertOctagon, CheckCircle2, Box, ShieldCheck, BrainCircuit, TrendingUp, Truck, Factory, FlaskConical } from 'lucide-react';
+import { Package, AlertTriangle, Activity, ArrowRight, AlertOctagon, CheckCircle2, Box, ShieldCheck, BrainCircuit, TrendingUp, Truck, Factory, FlaskConical, Thermometer, Unlock, Globe2 } from 'lucide-react';
 import { CardSkeleton } from '../components/shared/LoadingSpinner';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar } from 'recharts';
+import toast from 'react-hot-toast';
 
 const activityData = [
   { day: 'Mon', shipments: 12, verified: 10, flagged: 2 },
@@ -19,6 +20,67 @@ const activityData = [
   { day: 'Sat', shipments: 20, verified: 18, flagged: 0 },
   { day: 'Today', shipments: 25, verified: 23, flagged: 2 },
 ];
+
+
+
+const SystemTestingPanel = () => {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: async (threatType) => await api.post('/alerts/simulate', { threat_type: threatType }),
+    onSuccess: (res) => {
+      toast.success(res.data.message);
+      queryClient.invalidateQueries({ queryKey: ['dashboard-alerts'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-batches'] });
+    }
+  });
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="card p-5 xl:col-span-2 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-bl-full -z-10"></div>
+      <h3 className="text-xs font-semibold t-text-muted uppercase tracking-wider flex items-center gap-2 mb-4">
+        <Activity size={14} className="text-indigo-500" /> System Testing & QA Simulator
+      </h3>
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={() => mutation.mutate('TEMPERATURE_BREACH')} disabled={mutation.isPending} className="flex items-center justify-between p-2.5 rounded-lg border t-border t-bg-hover transition-all text-xs font-medium t-text group/btn">
+            <span className="flex items-center gap-2"><Thermometer size={14} className="text-red-500" /> Thermal Breach</span>
+            <span className="text-[10px] opacity-0 group-hover/btn:opacity-100 transition-opacity font-bold text-red-500">TRIGGER</span>
+          </button>
+          <button onClick={() => mutation.mutate('TAMPER_DETECTED')} disabled={mutation.isPending} className="flex items-center justify-between p-2.5 rounded-lg border t-border t-bg-hover transition-all text-xs font-medium t-text group/btn">
+            <span className="flex items-center gap-2"><Unlock size={14} className="text-orange-500" /> Tamper Event</span>
+            <span className="text-[10px] opacity-0 group-hover/btn:opacity-100 transition-opacity font-bold text-orange-500">TRIGGER</span>
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const SdgImpactPanel = () => {
+  return (
+    <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="card p-5 xl:col-span-2 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-bl-full -z-10"></div>
+      <h3 className="text-xs font-semibold t-text-muted uppercase tracking-wider flex items-center gap-2 mb-4">
+        <Globe2 size={14} className="dark:text-green-400 text-green-500" /> Real-World SDG Impact
+      </h3>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-3 t-bg rounded-lg text-center border t-border">
+          <p className="text-lg font-black dark:text-green-400 text-green-600 mb-0.5">14.2<span className="text-[10px] font-bold">t</span></p>
+          <p className="text-[9px] font-semibold t-text-muted uppercase">CO₂ Saved (SDG 12)</p>
+        </div>
+        <div className="p-3 t-bg rounded-lg text-center border t-border">
+          <p className="text-lg font-black dark:text-blue-400 text-blue-600 mb-0.5">3.4<span className="text-[10px] font-bold">k</span></p>
+          <p className="text-[9px] font-semibold t-text-muted uppercase">Safe Doses (SDG 3)</p>
+        </div>
+        <div className="p-3 t-bg rounded-lg text-center border t-border">
+          <p className="text-lg font-black dark:text-indigo-400 text-indigo-600 mb-0.5">100<span className="text-[10px] font-bold">%</span></p>
+          <p className="text-[9px] font-semibold t-text-muted uppercase">Tamper Proof (SDG 9)</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 const Dashboard = () => {
   const { dark } = useTheme();
@@ -55,6 +117,11 @@ const Dashboard = () => {
             <StatCard title="Verified" value={stats?.verified || 0} icon={ShieldCheck} color="blue" />
             <StatCard title="Total Batches" value={stats?.total_batches || 0} icon={Activity} color="indigo" />
           </>)}
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
+          <SystemTestingPanel />
+          <SdgImpactPanel />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
@@ -128,7 +195,7 @@ const Dashboard = () => {
               ) : alerts.slice(0, 4).map(alert => (
                 <div key={alert.id} className="p-3.5 rounded-lg" style={{ background: alert.is_acknowledged ? 'var(--bg-badge)' : (dark ? 'rgba(239,68,68,0.05)' : '#fef2f2'), border: `1px solid ${alert.is_acknowledged ? 'var(--border)' : (dark ? 'rgba(239,68,68,0.15)' : '#fecaca')}`, opacity: alert.is_acknowledged ? 0.6 : 1 }}>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: alert.is_acknowledged ? 'var(--bg-badge)' : (dark ? 'rgba(239,68,68,0.1)' : '#fee2e2'), color: alert.is_acknowledged ? 'var(--text-muted)' : '#ef4444' }}><AlertOctagon size={16} /></div>
+                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: alert.is_acknowledged ? 'var(--bg-badge)' : (dark ? 'rgba(239,68,68,0.1)' : '#fee2e2'), color: alert.is_acknowledged ? 'var(--text-muted)' : '#ef4444' }}><AlertOctagon size={16} /></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>{alert.anomaly_type}</span>
@@ -136,7 +203,7 @@ const Dashboard = () => {
                       </div>
                       <p className="text-[11px] font-mono mt-0.5" style={{ color: 'var(--text-muted)' }}>{alert.batch_id}</p>
                     </div>
-                    {alert.is_acknowledged && <CheckCircle2 size={14} className="text-green-500 shrink-0" />}
+                    {alert.is_acknowledged && <CheckCircle2 size={14} className="dark:text-green-400 text-green-500 shrink-0" />}
                   </div>
                 </div>
               ))}
@@ -145,7 +212,7 @@ const Dashboard = () => {
 
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="card overflow-hidden">
             <div className="px-5 py-4 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border)' }}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2" style={{ color: 'var(--text-primary)' }}><Box size={14} className="text-indigo-500" /> Recent Batches</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2" style={{ color: 'var(--text-primary)' }}><Box size={14} className="dark:text-indigo-400 text-indigo-500" /> Recent Batches</h3>
               <Link to="/batches" className="text-[11px] font-semibold flex items-center gap-1" style={{ color: 'var(--accent)' }}>View All <ArrowRight size={12} /></Link>
             </div>
             <div>
@@ -160,7 +227,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${batch.status === 'ACTIVE' ? 'bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400' : batch.status === 'FLAGGED' ? 'bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400' : 'bg-amber-50 text-amber-600'}`}>{batch.status}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${batch.status === 'ACTIVE' ? 'dark:bg-green-500/10 bg-green-50 dark:text-green-400 text-green-600 dark:bg-green-500/10 dark:text-green-400' : batch.status === 'FLAGGED' ? 'dark:bg-red-500/10 bg-red-50 dark:text-red-400 text-red-500 dark:bg-red-500/10 dark:text-red-400' : 'dark:bg-amber-500/10 bg-amber-50 dark:text-amber-400 text-amber-600'}`}>{batch.status}</span>
                     <ArrowRight size={14} style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </Link>

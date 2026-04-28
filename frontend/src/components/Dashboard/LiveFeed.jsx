@@ -39,7 +39,7 @@ const LiveFeed = ({ historicalData = [] }) => {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.02 }}
-                            className="p-3 bg-white/[0.03] rounded-xl border border-white/5 flex items-center justify-between group hover:border-teal-500/20 transition-all"
+                            className="p-3 t-card/[0.03] rounded-xl border border-white/5 flex items-center justify-between group hover:border-teal-500/20 transition-all"
                         >
                             <div className="flex items-center gap-3">
                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -63,11 +63,11 @@ const LiveFeed = ({ historicalData = [] }) => {
                             </div>
 
                             <div className="flex items-center gap-3 text-xs">
-                                <div className="flex items-center gap-1 px-2 py-1 bg-white/5 rounded-md">
+                                <div className="flex items-center gap-1 px-2 py-1 t-card/5 rounded-md">
                                     <Thermometer size={11} className="text-teal-400" />
                                     <span className="font-bold text-white">{update.temperature}°</span>
                                 </div>
-                                <div className="flex items-center gap-1 px-2 py-1 bg-white/5 rounded-md">
+                                <div className="flex items-center gap-1 px-2 py-1 t-card/5 rounded-md">
                                     <Droplets size={11} className="text-indigo-400" />
                                     <span className="font-bold text-white">{update.humidity}%</span>
                                 </div>
@@ -76,7 +76,7 @@ const LiveFeed = ({ historicalData = [] }) => {
                     ))}
                     {feed.length === 0 && (
                         <div className="h-full flex flex-col items-center justify-center text-slate-500 space-y-3 pt-20">
-                            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center">
+                            <div className="w-16 h-16 rounded-2xl t-card/5 flex items-center justify-center">
                                 <Radio size={28} className="animate-pulse" />
                             </div>
                             <p className="text-xs font-medium text-center">Awaiting telemetry<br/>synchronization...</p>

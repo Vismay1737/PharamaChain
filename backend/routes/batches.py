@@ -111,6 +111,8 @@ def verify_batch(batch_id):
     if batch.status == "RECALLED":
         status_msg = "RECALLED: DO NOT USE"
         
+    history = get_blockchain_service().get_batch_history(batch_id)
+        
     return standard_response(True, {
         "batch_id": batch_id,
         "drug_name": batch.drug_name,
@@ -123,7 +125,8 @@ def verify_batch(batch_id):
         "blockchain_tx_hash": batch.blockchain_tx_hash,
         "is_authentic": is_authentic,
         "has_anomalies": bool(any_anomalies),
-        "verification_summary": status_msg
+        "verification_summary": status_msg,
+        "blockchain_history": history
     })
 
 @batches_bp.route('/<batch_id>/qr', methods=['GET'])

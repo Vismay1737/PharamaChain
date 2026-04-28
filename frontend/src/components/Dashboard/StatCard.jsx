@@ -25,7 +25,7 @@ const StatCard = ({ title, value, unit = "", icon: Icon, color = "green", trend 
           {unit && <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{unit}</span>}
         </div>
         {trend && (
-          <p className={`text-[11px] font-medium mt-0.5 ${trend > 0 ? 'text-green-500' : 'text-red-500'}`}>
+          <p className={`text-[11px] font-medium mt-0.5 ${trend > 0 ? 'dark:text-green-400 text-green-500' : 'dark:text-red-400 text-red-500'}`}>
             {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}% from last 24h
           </p>
         )}
